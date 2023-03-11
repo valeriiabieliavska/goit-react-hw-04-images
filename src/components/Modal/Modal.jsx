@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 export const Modal = ({ url, onClose }) => {
 const onEscape = event => {
@@ -29,4 +30,9 @@ onClose();
 );
 }
 
+
+Modal.propTypes = {
+  url: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 

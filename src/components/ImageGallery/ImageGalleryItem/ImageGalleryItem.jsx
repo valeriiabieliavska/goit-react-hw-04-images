@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal } from 'components/Modal/Modal';
+import PropTypes from 'prop-types';
 
 export const ImageGalleryItem = ({ image }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,3 +24,14 @@ export const ImageGalleryItem = ({ image }) => {
     </>
   );
 };
+
+
+ImageGalleryItem.propTypes = {
+  image: PropTypes.shape({
+    webformatURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+
