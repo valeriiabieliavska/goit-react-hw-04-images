@@ -13,7 +13,7 @@ window.addEventListener('keydown', onEscape);
 return () => {
 window.removeEventListener('keydown', onEscape);
 };
-}, [onEscape]);
+}, []);
 
 const handleModalClose = event => {
 if (event.currentTarget === event.target) {
