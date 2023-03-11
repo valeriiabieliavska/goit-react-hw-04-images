@@ -1,67 +1,67 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { fetchImages } from 'services/apiServices';
 
-export class App extends Component {
-  state = {
-    query: '',
-    page: 1,
-    images: [],
-    isLoading: false,
-    totalImages: 0,
-  };
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalImages, setTotalImages] = useState(0);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
-      this.setState({ isLoading: true });
-      fetchImages(this.state.query, this.state.page)
-        .then(response => {
-          this.setState(prev => ({
-            images: [...prev.images, ...response.hits],
-            totalImages: response.totalHits,
-          }));
-        })
-        .finally(() => {
-          this.setState({ isLoading: false });
-        });
+  useEffect(() => {
+    async function fetchImagesData() {
+      setIsLoading(true);
+      try {
+        const response = await fetchImages(query, page);
+        if (response) {
+          setImages(prevImages =>
+            page === 1 ? [...response.hits] : [...prevImages, ...response.hits]
+          );
+          setTotalImages(response.totalHits);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }
 
-  handleSubmit = query => {
-    this.setState({ query,     page: 1,
-    images: [],
-    isLoading: false,
-    totalImages: 0,});
+    if (query !== '' && (page === 1 || page > 1)) {
+      fetchImagesData();
+    }
+  }, [query, page]);
+
+  const handleSubmit = newQuery => {
+    setQuery(newQuery);
+    setPage(1);
+    setImages([]);
+    setIsLoading(false);
+    setTotalImages(0);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1}));
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  renderButtonOrLoader = () => {
-    return this.state.isLoading ? (
-          <Loader />
-        ) : (
-          !!this.state.images.length &&
-          this.state.images.length < this.state.totalImages && (
-            <Button onLoadMore={this.handleLoadMore} />
-          )
-        )
-  };
-
-  render() {
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery images={this.state.images} />
-        {this.renderButtonOrLoader()}
-      </>
+  const renderButtonOrLoader = () => {
+    return isLoading ? (
+      <Loader />
+    ) : (
+      !!images.length && images.length < totalImages && (
+        <Button onLoadMore={handleLoadMore} />
+      )
     );
-  }
-}
+  };
+
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
+      <ImageGallery images={images} />
+      {renderButtonOrLoader()}
+    </>
+  );
+};
